@@ -2,33 +2,47 @@
 
 import re
 
-class application:
+class WSGIapp:
+	"""Base class for my WSGI application."""
+
 	def __init__(self, environ, start_response):
 		self.environ = environ
-		self.start_response = start_response
+		self.start = start_response
+		start.status = '200 OK'
+		start._headers = []
 
-	# def __iter__(self):
-	# 	status = '200 OK'
-	# 	response_headers = [('Content-type', 'text/plain')]
-	# 	self.start(status, response_headers)
-	# 	yield 'Hello world!'
+	def header(self, name, value):
+		self._headers.append((name, value))
 
 	def __iter__(self):
-		return self.delegate()
+		try:
+			x = self.delegate()
+			self.start(self.status, self._headers)
+		except:
+			headers = [('Content-type', 'text/plain')]
+			self.start('500 Internal Error', headers)
+			x = 'Internal Error:\n\n' + traceback.format_exec()
 
-		def delegate(self):
-			path = self.environ['PATH_INFO']
-			method = self.environ['REQUEST_METHOD']
+		if isinstance(x, str):
+			return iter([x])
+		else:
+			return iter(x)
 
-			for pattern, name in self.urls:
-				m = re.match('^' + pattern + '$', path)
-				if m:
-					args = m.groups()
-					func_name = method.upper() + "_" + name
-					func = getattr(self, func_name)
-					return func(*args)
+	def delegate(self):
+		path = self.environ['PATH_INFO']
+		method = self.environ['REQUEST_METHOD']
 
-			return self.not_found()
+		for pattern, name in self.urls:
+			m = re.match('^' + pattern + '$', path)
+			if m:
+				args = m.groups()
+				func_name = method.upper() + "_" + name
+				func = getattr(self, func_name)
+				return func(*args)
+
+		return self.not_found()
+
+class Application(WSGIapp):
 
 	urls = [
 			("/", "index"),
