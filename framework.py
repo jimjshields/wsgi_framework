@@ -1,6 +1,7 @@
 # From http://anandology.com/blog/how-to-write-a-web-framework-in-python/
 
 import re
+import traceback
 
 class WSGIapp:
 	"""Base class for my WSGI application."""
