@@ -1,9 +1,12 @@
 # From http://anandology.com/blog/how-to-write-a-web-framework-in-python/
 
-def application(environ, start_response):
-	"""Simplest possible application object."""
+class application:
+	def __init__(self, environ, start_response):
+		self.environ = environ
+		self.start_response = start_response
 
-	status = '200 OK'
-	response_headers = [('Content-type', 'text/plain')]
-	start_response(status, response_headers)
-	return ['Hello world!']
+	def __iter__(self):
+		status = '200 OK'
+		response_headers = [('Content-type', 'text/plain')]
+		self.start(status, response_headers)
+		yield 'Hello world!'
